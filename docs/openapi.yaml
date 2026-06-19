@@ -1,0 +1,238 @@
+openapi: 3.0.3
+info:
+  title: Analytics Service API
+  version: 1.0.0
+  description: |
+    Microservicio para recibir y almacenar eventos analíticos.
+    Proporciona endpoints para verificar el estado del servicio y
+    para la ingesta de eventos con deduplicación basada en event_id.
+  contact:
+    name: Analytics Service Team
+  license:
+    name: ISC
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      description: >
+        Returns the current service status including uptime, environment,
+        and database connectivity. Responds with 200 when healthy or 503
+        when the database is unreachable.
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthOk'
+        '503':
+          description: Service is degraded (database disconnected)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthDegraded'
+
+  /api/events:
+    post:
+      summary: Ingest an analytic event
+      description: >
+        Creates a new analytic event record. Uses event_id for
+        deduplication — submitting the same event_id twice returns
+        200 (duplicate) instead of 201 (created).
+      operationId: createEvent
+      tags:
+        - Events
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventResponse'
+        '200':
+          description: Duplicate event (event_id already exists)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventResponse'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Internal API key shared between services
+
+  schemas:
+    CreateEventRequest:
+      type: object
+      required:
+        - event_id
+        - type
+        - service
+        - aggregate_type
+        - aggregate_id
+        - event_timestamp
+        - payload
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          description: Unique event identifier (UUID v4)
+          example: 550e8400-e29b-41d4-a716-446655440000
+        type:
+          type: string
+          enum:
+            - USER_CREATED
+            - USER_STATUS_CHANGED
+            - ORDER_CREATED
+            - PAYMENT_PROCESSED
+            - VENDOR_CREATED
+            - VENDOR_UPDATED
+            - VENDOR_STATUS_CHANGED
+          description: Event type
+          example: USER_CREATED
+        service:
+          type: string
+          description: Name of the originating service
+          example: user-service
+        aggregate_type:
+          type: string
+          description: Domain aggregate type
+          example: user
+        aggregate_id:
+          type: string
+          description: Domain aggregate identifier
+          example: user-123
+        vendor_id:
+          type: string
+          nullable: true
+          description: Optional vendor identifier
+          example: vendor-456
+        payload:
+          type: object
+          description: Arbitrary event payload
+          example:
+            email: test@example.com
+        event_timestamp:
+          type: string
+          format: date-time
+          description: ISO-8601 timestamp of when the event occurred
+          example: '2024-01-15T10:30:00.000Z'
+
+    CreateEventResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Always true on successful processing
+          example: true
+        created:
+          type: boolean
+          description: True if a new row was inserted; false if duplicate
+          example: true
+
+    HealthOk:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok]
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:30:00.000Z'
+        uptime:
+          type: number
+          description: Server uptime in seconds
+          example: 1234.56
+        environment:
+          type: string
+          description: Node environment
+          example: production
+        database:
+          type: string
+          enum: [connected]
+          example: connected
+
+    HealthDegraded:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [degraded]
+          example: degraded
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+        environment:
+          type: string
+        database:
+          type: string
+          enum: [disconnected]
+          example: disconnected
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: string
+          example:
+            - event_id must be a valid UUID v4
+            - type must be one of: USER_CREATED, USER_STATUS_CHANGED, ...
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unauthorized

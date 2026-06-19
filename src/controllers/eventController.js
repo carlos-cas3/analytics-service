@@ -13,6 +13,32 @@ const ALLOWED_TYPES = [
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/**
+ * Validates the body of a create-event request.
+ *
+ * Checks that all required fields are present, `event_id` is a valid
+ * UUID v4, `type` is one of the allowed values, and field-specific
+ * type constraints are satisfied. Returns an array of error messages;
+ * an empty array means the payload is valid.
+ *
+ * @function
+ * @param {Object} body - The parsed request body to validate
+ * @param {string} body.event_id - Event UUID
+ * @param {string} body.type - Event type
+ * @param {string} body.service - Originating service name
+ * @param {string} body.aggregate_type - Domain aggregate type
+ * @param {string} body.aggregate_id - Domain aggregate identifier
+ * @param {string} body.event_timestamp - ISO-8601 timestamp
+ * @param {Object} body.payload - Event payload
+ * @param {string} [body.vendor_id] - Optional vendor identifier
+ * @returns {string[]} Array of validation error messages (empty if valid)
+ *
+ * @example
+ * const errors = validateCreateEvent(req.body);
+ * if (errors.length > 0) {
+ *   return res.status(400).json({ error: 'Validation failed', details: errors });
+ * }
+ */
 function validateCreateEvent(body) {
   const errors = [];
 
@@ -65,6 +91,36 @@ function validateCreateEvent(body) {
   return errors;
 }
 
+/**
+ * Creates a new analytic event.
+ *
+ * Validates the request body, delegates processing to the service
+ * layer, and responds with 201 when a new event is created or 200
+ * when a duplicate event_id is detected.
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Sends a JSON response with the operation result
+ * @throws {Error} Passes unexpected errors to the global error handler via `next(err)`
+ *
+ * @example
+ * // Request body:
+ * {
+ *   "event_id": "550e8400-e29b-41d4-a716-446655440000",
+ *   "type": "USER_CREATED",
+ *   "service": "user-service",
+ *   "aggregate_type": "user",
+ *   "aggregate_id": "user-123",
+ *   "vendor_id": "vendor-456",
+ *   "payload": { "email": "test@example.com" },
+ *   "event_timestamp": "2024-01-15T10:30:00.000Z"
+ * }
+ * // Response (201):
+ * { "success": true, "created": true }
+ */
 async function create(req, res, next) {
   try {
     const errors = validateCreateEvent(req.body);
