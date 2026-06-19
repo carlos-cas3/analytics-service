@@ -30,7 +30,7 @@ const UUID_REGEX =
  * @param {string} body.aggregate_id - Domain aggregate identifier
  * @param {string} body.event_timestamp - ISO-8601 timestamp
  * @param {Object} body.payload - Event payload
- * @param {string} [body.vendor_id] - Optional vendor identifier
+ * @param {string[]} [body.vendor_ids] - Optional array of vendor identifiers
  * @returns {string[]} Array of validation error messages (empty if valid)
  *
  * @example
@@ -88,6 +88,14 @@ function validateCreateEvent(body) {
     errors.push('event_timestamp must be a valid ISO date string');
   }
 
+  if (body.vendor_ids !== undefined) {
+    if (!Array.isArray(body.vendor_ids)) {
+      errors.push('vendor_ids must be an array');
+    } else if (!body.vendor_ids.every(v => typeof v === 'string' && v.trim() !== '')) {
+      errors.push('vendor_ids must be an array of non-empty strings');
+    }
+  }
+
   return errors;
 }
 
@@ -114,7 +122,7 @@ function validateCreateEvent(body) {
  *   "service": "user-service",
  *   "aggregate_type": "user",
  *   "aggregate_id": "user-123",
- *   "vendor_id": "vendor-456",
+ *   "vendor_ids": ["vendor-456"],
  *   "payload": { "email": "test@example.com" },
  *   "event_timestamp": "2024-01-15T10:30:00.000Z"
  * }
@@ -135,7 +143,7 @@ async function create(req, res, next) {
       service: req.body.service,
       aggregate_type: req.body.aggregate_type,
       aggregate_id: req.body.aggregate_id,
-      vendor_id: req.body.vendor_id || null,
+      vendor_ids: req.body.vendor_ids || [],
       payload: req.body.payload,
       event_timestamp: new Date(req.body.event_timestamp).toISOString(),
       source_ip: req.ip,

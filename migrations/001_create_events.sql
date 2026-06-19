@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS events (
   service TEXT NOT NULL,
   aggregate_type TEXT NOT NULL,
   aggregate_id TEXT NOT NULL,
-  vendor_id TEXT,
+  vendor_ids JSONB NOT NULL DEFAULT '[]',
   payload JSONB NOT NULL,
   event_timestamp TIMESTAMPTZ NOT NULL,
   source_ip TEXT,
