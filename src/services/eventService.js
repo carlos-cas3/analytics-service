@@ -15,7 +15,7 @@ const eventRepository = require('../repositories/eventRepository');
  * @param {string} data.service - Name of the originating service
  * @param {string} data.aggregate_type - Domain aggregate type
  * @param {string} data.aggregate_id - Domain aggregate identifier
- * @param {string|null} [data.vendor_id=null] - Optional vendor identifier
+ * @param {string[]} [data.vendor_ids=[]] - Optional vendor identifiers
  * @param {Object} data.payload - Arbitrary event payload
  * @param {string} data.event_timestamp - ISO-8601 timestamp of the event
  * @param {string} [data.source_ip=null] - Originating IP address
