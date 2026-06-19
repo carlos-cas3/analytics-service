@@ -23,6 +23,9 @@ const specPath = path.join(__dirname, '..', '..', 'docs', 'openapi.yaml');
 const specContent = fs.readFileSync(specPath, 'utf8');
 const swaggerSpec = yaml.load(specContent);
 
+const apiUrl = process.env.API_URL || `http://localhost:${process.env.PORT || 3003}`;
+swaggerSpec.servers = [{ url: apiUrl, description: 'Analytics Service' }];
+
 router.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 module.exports = router;

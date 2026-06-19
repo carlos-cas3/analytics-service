@@ -42,7 +42,7 @@ async function save(data) {
       service: data.service,
       aggregate_type: data.aggregate_type,
       aggregate_id: data.aggregate_id,
-      vendor_ids: data.vendor_ids,
+      vendor_id: data.vendor_id || null,
       payload: data.payload,
       event_timestamp: data.event_timestamp,
       source_ip: data.source_ip || null,

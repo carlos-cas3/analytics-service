@@ -15,10 +15,11 @@ const errorHandler = require('./middlewares/errorHandler');
  * 2. Rate limiter – 100 requests per 15-minute window per IP
  * 3. JSON body parser – 1 MB limit
  * 4. API routes – health check and event ingestion
- * 5. Swagger UI – OpenAPI documentation at `GET /api/docs`
- * 6. Global error handler – catches unhandled exceptions
+ * 5. Global error handler – catches unhandled exceptions
  *
- * Listens on the port defined by the `PORT` env var (default 3000).
+ * Listens on the port defined by the `PORT` env var (default 3003).
+ * When `PORT_DOCS` is set, a second Express server is started for
+ * the Swagger UI documentation at `GET /api/docs`.
  *
  * @constant
  * @type {import('express').Express}
@@ -29,7 +30,7 @@ const errorHandler = require('./middlewares/errorHandler');
  * // app.listen() is called within this module
  */
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 
 const allowedOrigins = (
   process.env.ALLOWED_ORIGINS ||
@@ -53,12 +54,19 @@ app.use(limiter);
 app.use(express.json({ limit: '1mb' }));
 
 app.use(eventRoutes);
-app.use(docsRoutes);
 
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Analytics service running on port ${PORT}`);
 });
+
+if (process.env.PORT_DOCS) {
+  const docsApp = express();
+  docsApp.use(docsRoutes);
+  docsApp.listen(process.env.PORT_DOCS, () => {
+    console.log(`API docs available on http://localhost:${process.env.PORT_DOCS}/api/docs`);
+  });
+}
 
 module.exports = app;

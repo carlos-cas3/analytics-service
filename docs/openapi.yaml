@@ -11,10 +11,6 @@ info:
   license:
     name: ISC
 
-servers:
-  - url: http://localhost:3000
-    description: Local development
-
 paths:
   /api/health:
     get:
