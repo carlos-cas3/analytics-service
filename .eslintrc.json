@@ -1,0 +1,16 @@
+{
+  "extends": "airbnb-base",
+  "env": {
+    "node": true,
+    "jest": true
+  },
+  "rules": {
+    "no-console": "off",
+    "linebreak-style": "off",
+    "consistent-return": "off",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "next" }],
+    "no-restricted-syntax": "off",
+    "no-restricted-globals": "off",
+    "operator-linebreak": ["error", "after"]
+  }
+}

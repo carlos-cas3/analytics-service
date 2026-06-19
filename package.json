@@ -12,12 +12,16 @@
   },
   "license": "ISC",
   "author": "",
+  "engines": {
+    "node": ">=18"
+  },
   "type": "commonjs",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src/"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
@@ -27,6 +31,10 @@
     "express-rate-limit": "^7.5.0"
   },
   "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.9"
   }
 }

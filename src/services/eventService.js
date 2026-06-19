@@ -10,7 +10,7 @@ async function processEvent(data) {
 
   const result = await eventRepository.save(data);
 
-  if (result.length === 0) {
+  if (!result || result.length === 0) {
     console.log({
       event_id: data.event_id,
       type: data.type,

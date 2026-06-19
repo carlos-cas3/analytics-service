@@ -97,4 +97,5 @@ async function create(req, res, next) {
   }
 }
 
-module.exports = { create };
+// validateCreateEvent is exported for unit testing (pure logic, no dependencies)
+module.exports = { create, validateCreateEvent };
