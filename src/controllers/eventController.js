@@ -91,7 +91,7 @@ function validateCreateEvent(body) {
   if (body.vendor_ids !== undefined) {
     if (!Array.isArray(body.vendor_ids)) {
       errors.push('vendor_ids must be an array');
-    } else if (!body.vendor_ids.every(v => typeof v === 'string' && v.trim() !== '')) {
+    } else if (!body.vendor_ids.every((v) => typeof v === 'string' && v.trim() !== '')) {
       errors.push('vendor_ids must be an array of non-empty strings');
     }
   }
