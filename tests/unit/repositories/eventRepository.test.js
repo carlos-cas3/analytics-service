@@ -32,7 +32,7 @@ describe('eventRepository.save', () => {
         service: validEvent.service,
         aggregate_type: validEvent.aggregate_type,
         aggregate_id: validEvent.aggregate_id,
-        vendor_id: null,
+        vendor_ids: [],
         payload: validEvent.payload,
         event_timestamp: validEvent.event_timestamp,
         source_ip: '127.0.0.1',
@@ -43,14 +43,14 @@ describe('eventRepository.save', () => {
     expect(result).toEqual([{ event_id: validEvent.event_id }]);
   });
 
-  it('should include vendor_id when present in the data', async () => {
+  it('should include vendor_ids when present in the data', async () => {
     mockSelect.mockResolvedValue({ data: [{ event_id: validEvent.event_id }], error: null });
     const data = { ...validEventWithVendor, source_ip: '127.0.0.1' };
 
     await save(data);
 
     expect(mockInsert).toHaveBeenCalledWith(
-      [expect.objectContaining({ vendor_id: 'vendor-456' })],
+      [expect.objectContaining({ vendor_ids: ['vendor-456'] })],
       expect.any(Object),
     );
   });

@@ -57,4 +57,23 @@ async function save(data) {
   return result;
 }
 
-module.exports = { save };
+async function getUnprocessedBatch(limit = 10) {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .or('processed.is.null,processed.eq.false')
+    .order('event_timestamp', { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
+async function markProcessed(id) {
+  const { error } = await supabase
+    .from('events')
+    .update({ processed: true })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+module.exports = { save, getUnprocessedBatch, markProcessed };

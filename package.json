@@ -22,7 +22,9 @@
     "dev": "nodemon src/app.js",
     "test": "jest --passWithNoTests",
     "lint": "eslint src/",
-    "docs": "echo 'OpenAPI spec available at docs/openapi.yaml'"
+    "docs": "echo 'OpenAPI spec available at docs/openapi.yaml'",
+    "worker": "node src/worker.js",
+    "alerts": "node src/alerts/alertsJob.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
