@@ -5,14 +5,19 @@ jest.mock('../../../../src/repositories/metricsRepository');
 const { handle } = require('../../../../src/handlers/auth/userCreated.handler');
 const { authUserCreated } = require('../../../fixtures/events');
 
-describe('userCreated.handler', () => {
+describe('handler userCreated', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should increment daily_metrics.new_users by 1', async () => {
-    await handle(authUserCreated);
+  it('debe incrementar daily_metrics.new_users en 1', async () => {
+    // Arrange
+    const event = authUserCreated;
 
+    // Act
+    await handle(event);
+
+    // Assert
     expect(metricsRepository.incrementDailyMetric).toHaveBeenCalledTimes(1);
     expect(metricsRepository.incrementDailyMetric).toHaveBeenCalledWith(
       '2024-01-15',

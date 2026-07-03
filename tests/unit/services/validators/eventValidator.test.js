@@ -18,89 +18,187 @@ const {
 } = require('../../../fixtures/events');
 
 describe('eventValidator.validateEvent', () => {
-  it('should return valid for auth-service USER_CREATED', () => {
-    const result = validateEvent(authUserCreated);
+  it('debe retornar válido para auth-service USER_CREATED', () => {
+    // Arrange
+    const event = authUserCreated;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result).toEqual({ valid: true });
   });
 
-  it('should return valid for auth-service LOGIN_FAILED', () => {
-    const result = validateEvent(authLoginFailed);
+  it('debe retornar válido para auth-service LOGIN_FAILED', () => {
+    // Arrange
+    const event = authLoginFailed;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result).toEqual({ valid: true });
   });
 
-  it('should return valid for vendor-service VENDOR_CREATED', () => {
-    const result = validateEvent(vendorVendorCreated);
+  it('debe retornar válido para vendor-service VENDOR_CREATED', () => {
+    // Arrange
+    const event = vendorVendorCreated;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result).toEqual({ valid: true });
   });
 
-  it('should return valid for vendor-service BRANCH_CREATED', () => {
-    const result = validateEvent(vendorBranchCreated);
+  it('debe retornar válido para vendor-service BRANCH_CREATED', () => {
+    // Arrange
+    const event = vendorBranchCreated;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result).toEqual({ valid: true });
   });
 
-  it('should return valid for auth-service LOGIN_SUCCESS (known skip)', () => {
-    const result = validateEvent(authLoginSuccess);
+  it('debe retornar válido para auth-service LOGIN_SUCCESS (skip conocido)', () => {
+    // Arrange
+    const event = authLoginSuccess;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result).toEqual({ valid: true });
   });
 
-  it('should return valid for vendor-service STAFF_CREATED (known skip)', () => {
-    const result = validateEvent(vendorStaffCreated);
+  it('debe retornar válido para vendor-service STAFF_CREATED (skip conocido)', () => {
+    // Arrange
+    const event = vendorStaffCreated;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result).toEqual({ valid: true });
   });
 
-  it('should reject unknown service', () => {
-    const result = validateEvent(eventUnknownService);
+  it('debe rechazar servicio desconocido', () => {
+    // Arrange
+    const event = eventUnknownService;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('unknown service');
   });
 
-  it('should reject event type not valid for the service', () => {
-    const result = validateEvent(eventTypeNotInService);
+  it('debe rechazar tipo de evento no válido para el servicio', () => {
+    // Arrange
+    const event = eventTypeNotInService;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('not valid for service');
   });
 
-  it('should reject cross-validation failure (type vs aggregate_type)', () => {
-    const result = validateEvent(eventCrossValidationFail);
+  it('debe rechazar fallo de validación cruzada (type vs aggregate_type)', () => {
+    // Arrange
+    const event = eventCrossValidationFail;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('aggregate_type mismatch');
   });
 
-  it('should reject empty aggregate_id', () => {
-    const result = validateEvent(eventEmptyAggregateId);
+  it('debe rechazar aggregate_id vacío', () => {
+    // Arrange
+    const event = eventEmptyAggregateId;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('aggregate_id is empty');
   });
 
-  it('should reject invalid event_timestamp', () => {
-    const result = validateEvent(eventInvalidTimestamp);
+  it('debe rechazar event_timestamp inválido', () => {
+    // Arrange
+    const event = eventInvalidTimestamp;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('event_timestamp');
   });
 
-  it('should reject null payload', () => {
-    const result = validateEvent(eventPayloadNull);
+  it('debe rechazar payload null', () => {
+    // Arrange
+    const event = eventPayloadNull;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('payload');
   });
 
-  it('should reject array payload', () => {
-    const result = validateEvent(eventPayloadArray);
+  it('debe rechazar payload tipo array', () => {
+    // Arrange
+    const event = eventPayloadArray;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('payload');
   });
 
-  it('should reject non-array vendor_ids', () => {
-    const result = validateEvent(eventVendorIdsNotArray);
+  it('debe rechazar vendor_ids que no es un array', () => {
+    // Arrange
+    const event = eventVendorIdsNotArray;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('vendor_ids');
   });
 
-  it('should return valid false for null input', () => {
-    expect(validateEvent(null).valid).toBe(false);
+  it('debe retornar valid false para entrada null', () => {
+    // Arrange
+    const event = null;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
+    expect(result.valid).toBe(false);
   });
 
-  it('should return valid false for undefined input', () => {
-    expect(validateEvent(undefined).valid).toBe(false);
+  it('debe retornar valid false para entrada undefined', () => {
+    // Arrange
+    const event = undefined;
+
+    // Act
+    const result = validateEvent(event);
+
+    // Assert
+    expect(result.valid).toBe(false);
   });
 });

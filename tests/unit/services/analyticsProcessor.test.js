@@ -17,39 +17,63 @@ describe('analyticsProcessor.processEvent', () => {
     jest.clearAllMocks();
   });
 
-  it('should call handler and mark processed for a valid event with handler', async () => {
+  it('debe llamar al handler y marcar como procesado para un evento válido con handler', async () => {
+    // Arrange
+    // (eventRepository.markProcessed mockeado automáticamente)
+
+    // Act
     await processEvent(authUserCreated);
 
+    // Assert
     expect(eventRepository.markProcessed).toHaveBeenCalledWith(authUserCreated.id);
   });
 
-  it('should mark processed and skip when no handler exists', async () => {
+  it('debe marcar como procesado y saltar cuando no existe handler', async () => {
+    // Arrange
+    // (eventRepository.markProcessed mockeado automáticamente)
+
+    // Act
     await processEvent(authLoginSuccess);
 
+    // Assert
     expect(eventRepository.markProcessed).toHaveBeenCalledWith(authLoginSuccess.id);
   });
 
-  it('should mark processed and skip when event type has null handler', async () => {
+  it('debe marcar como procesado y saltar cuando el tipo de evento tiene handler null', async () => {
+    // Arrange
+    // (eventRepository.markProcessed mockeado automáticamente)
+
+    // Act
     await processEvent(vendorStaffCreated);
 
+    // Assert
     expect(eventRepository.markProcessed).toHaveBeenCalledWith(vendorStaffCreated.id);
   });
 
-  it('should mark processed and log invalid for invalid event', async () => {
+  it('debe marcar como procesado y registrar inválido para un evento inválido', async () => {
+    // Arrange
+    // (eventRepository.markProcessed mockeado automáticamente)
+
+    // Act
     await processEvent(eventCrossValidationFail);
 
+    // Assert
     expect(eventRepository.markProcessed).toHaveBeenCalledWith(eventCrossValidationFail.id);
   });
 
-  it('should NOT mark processed when handler throws an error', async () => {
+  it('debe NO marcar como procesado cuando el handler lanza un error', async () => {
+    // Arrange
     const handler = require('../../../src/handlers/auth/userCreated.handler');
     const originalHandle = handler.handle;
     handler.handle = jest.fn().mockRejectedValue(new Error('DB connection failed'));
 
+    // Act
     await processEvent(authUserCreated);
 
+    // Assert
     expect(eventRepository.markProcessed).not.toHaveBeenCalled();
 
+    // Cleanup
     handler.handle = originalHandle;
   });
 });

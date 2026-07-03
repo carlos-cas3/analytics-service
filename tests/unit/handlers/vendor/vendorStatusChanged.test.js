@@ -8,14 +8,19 @@ const {
   vendorVendorStatusChangedActive,
 } = require('../../../fixtures/events');
 
-describe('vendorStatusChanged.handler', () => {
+describe('handler vendorStatusChanged', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should decrement total_vendors when status=INACTIVE', async () => {
-    await handle(vendorVendorStatusChangedInactive);
+  it('debe decrementar total_vendors cuando status=INACTIVE', async () => {
+    // Arrange
+    const event = vendorVendorStatusChangedInactive;
 
+    // Act
+    await handle(event);
+
+    // Assert
     expect(metricsRepository.incrementMonthlyMetric).toHaveBeenCalledWith(
       '2024-01-01',
       'total_vendors',
@@ -23,9 +28,14 @@ describe('vendorStatusChanged.handler', () => {
     );
   });
 
-  it('should do nothing when status=ACTIVE', async () => {
-    await handle(vendorVendorStatusChangedActive);
+  it('debe no hacer nada cuando status=ACTIVE', async () => {
+    // Arrange
+    const event = vendorVendorStatusChangedActive;
 
+    // Act
+    await handle(event);
+
+    // Assert
     expect(metricsRepository.incrementMonthlyMetric).not.toHaveBeenCalled();
   });
 });

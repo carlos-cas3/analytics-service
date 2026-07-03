@@ -19,36 +19,47 @@ describe('eventRepository.getUnprocessedBatch', () => {
     supabase.from.mockReturnValue({ select: mockSelect });
   });
 
-  it('should query unprocessed events ordered by event_timestamp', async () => {
+  it('debe consultar eventos no procesados ordenados por event_timestamp', async () => {
+    // Arrange
     mockLimit.mockResolvedValue({ data: [], error: null });
 
+    // Act
     await getUnprocessedBatch(10);
 
+    // Assert
     expect(supabase.from).toHaveBeenCalledWith('events');
     expect(mockLimit).toHaveBeenCalledWith(10);
   });
 
-  it('should return data array when events exist', async () => {
+  it('debe retornar un array de datos cuando existen eventos', async () => {
+    // Arrange
     const fakeEvents = [{ id: '1', type: 'USER_CREATED' }];
     mockLimit.mockResolvedValue({ data: fakeEvents, error: null });
 
+    // Act
     const result = await getUnprocessedBatch();
 
+    // Assert
     expect(result).toEqual(fakeEvents);
   });
 
-  it('should return empty array when data is null', async () => {
+  it('debe retornar un array vacío cuando data es null', async () => {
+    // Arrange
     mockLimit.mockResolvedValue({ data: null, error: null });
 
+    // Act
     const result = await getUnprocessedBatch();
 
+    // Assert
     expect(result).toEqual([]);
   });
 
-  it('should throw when supabase returns error', async () => {
+  it('debe lanzar error cuando supabase retorna error', async () => {
+    // Arrange
     const dbError = new Error('DB error');
     mockLimit.mockResolvedValue({ data: null, error: dbError });
 
+    // Act & Assert
     await expect(getUnprocessedBatch()).rejects.toThrow(dbError);
   });
 });
@@ -64,20 +75,25 @@ describe('eventRepository.markProcessed', () => {
     supabase.from.mockReturnValue({ update: mockUpdate });
   });
 
-  it('should update processed to true for the given id', async () => {
+  it('debe actualizar processed a true para el id dado', async () => {
+    // Arrange
     mockEq.mockResolvedValue({ data: null, error: null });
 
+    // Act
     await markProcessed('event-id-123');
 
+    // Assert
     expect(supabase.from).toHaveBeenCalledWith('events');
     expect(mockUpdate).toHaveBeenCalledWith({ processed: true });
     expect(mockEq).toHaveBeenCalledWith('id', 'event-id-123');
   });
 
-  it('should throw when supabase returns error', async () => {
+  it('debe lanzar error cuando supabase retorna error', async () => {
+    // Arrange
     const dbError = new Error('Update failed');
     mockEq.mockResolvedValue({ data: null, error: dbError });
 
+    // Act & Assert
     await expect(markProcessed('event-id-123')).rejects.toThrow(dbError);
   });
 });

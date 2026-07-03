@@ -5,14 +5,19 @@ jest.mock('../../../../src/repositories/metricsRepository');
 const { handle } = require('../../../../src/handlers/vendor/branchCreated.handler');
 const { vendorBranchCreated, vendorBranchCreatedNoVendor } = require('../../../fixtures/events');
 
-describe('branchCreated.handler', () => {
+describe('handler branchCreated', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should increment vendor_daily_metrics.branches_count when vendor_id is present', async () => {
-    await handle(vendorBranchCreated);
+  it('debe incrementar vendor_daily_metrics.branches_count cuando vendor_id está presente', async () => {
+    // Arrange
+    const event = vendorBranchCreated;
 
+    // Act
+    await handle(event);
+
+    // Assert
     expect(metricsRepository.incrementVendorDailyMetric).toHaveBeenCalledWith(
       '1',
       '2024-01-16',
@@ -21,9 +26,14 @@ describe('branchCreated.handler', () => {
     );
   });
 
-  it('should skip when vendor_ids is empty', async () => {
-    await handle(vendorBranchCreatedNoVendor);
+  it('debe saltar cuando vendor_ids está vacío', async () => {
+    // Arrange
+    const event = vendorBranchCreatedNoVendor;
 
+    // Act
+    await handle(event);
+
+    // Assert
     expect(metricsRepository.incrementVendorDailyMetric).not.toHaveBeenCalled();
   });
 });

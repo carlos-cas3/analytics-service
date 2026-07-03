@@ -11,43 +11,57 @@ describe('eventService.processEvent', () => {
     jest.clearAllMocks();
   });
 
-  it('should return created:true when repository saves a new event', async () => {
+  it('debe retornar created:true cuando el repositorio guarda un evento nuevo', async () => {
+    // Arrange
     eventRepository.save.mockResolvedValue([{ event_id: validEvent.event_id }]);
 
+    // Act
     const result = await processEvent(data);
 
+    // Assert
     expect(result).toEqual({ success: true, created: true });
   });
 
-  it('should return created:false when repository returns empty array (duplicate)', async () => {
+  it('debe retornar created:false cuando el repositorio retorna array vacío (duplicado)', async () => {
+    // Arrange
     eventRepository.save.mockResolvedValue([]);
 
+    // Act
     const result = await processEvent(data);
 
+    // Assert
     expect(result).toEqual({ success: true, created: false });
   });
 
-  it('should return created:false when repository returns null (Supabase ignoreDuplicates)', async () => {
+  it('debe retornar created:false cuando el repositorio retorna null (Supabase ignoreDuplicates)', async () => {
+    // Arrange
     eventRepository.save.mockResolvedValue(null);
 
+    // Act
     const result = await processEvent(data);
 
+    // Assert
     expect(result).toEqual({ success: true, created: false });
   });
 
-  it('should call eventRepository.save with the exact data received', async () => {
+  it('debe llamar a eventRepository.save con los datos exactos recibidos', async () => {
+    // Arrange
     eventRepository.save.mockResolvedValue([{ event_id: validEvent.event_id }]);
 
+    // Act
     await processEvent(data);
 
+    // Assert
     expect(eventRepository.save).toHaveBeenCalledTimes(1);
     expect(eventRepository.save).toHaveBeenCalledWith(data);
   });
 
-  it('should propagate the error when repository throws', async () => {
+  it('debe propagar el error cuando el repositorio lanza una excepción', async () => {
+    // Arrange
     const error = new Error('DB connection failed');
     eventRepository.save.mockRejectedValue(error);
 
+    // Act & Assert
     await expect(processEvent(data)).rejects.toThrow(error);
   });
 });

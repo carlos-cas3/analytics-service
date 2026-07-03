@@ -8,14 +8,19 @@ const {
   authUserStatusChangedRejected,
 } = require('../../../fixtures/events');
 
-describe('userStatusChanged.handler', () => {
+describe('handler userStatusChanged', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should increment users_approved when status=active and previous_status=pending', async () => {
-    await handle(authUserStatusChangedApproved);
+  it('debe incrementar users_approved cuando status=active y previous_status=pending', async () => {
+    // Arrange
+    const event = authUserStatusChangedApproved;
 
+    // Act
+    await handle(event);
+
+    // Assert
     expect(metricsRepository.incrementDailyMetric).toHaveBeenCalledWith(
       '2024-01-15',
       'users_approved',
@@ -23,9 +28,14 @@ describe('userStatusChanged.handler', () => {
     );
   });
 
-  it('should increment users_rejected when status=rejected', async () => {
-    await handle(authUserStatusChangedRejected);
+  it('debe incrementar users_rejected cuando status=rejected', async () => {
+    // Arrange
+    const event = authUserStatusChangedRejected;
 
+    // Act
+    await handle(event);
+
+    // Assert
     expect(metricsRepository.incrementDailyMetric).toHaveBeenCalledWith(
       '2024-01-15',
       'users_rejected',
@@ -33,14 +43,17 @@ describe('userStatusChanged.handler', () => {
     );
   });
 
-  it('should do nothing for other status transitions', async () => {
+  it('debe no hacer nada para otras transiciones de estado', async () => {
+    // Arrange
     const event = {
       ...authUserStatusChangedApproved,
       payload: { status: 'active', previous_status: 'active' },
     };
 
+    // Act
     await handle(event);
 
+    // Assert
     expect(metricsRepository.incrementDailyMetric).not.toHaveBeenCalled();
   });
 });

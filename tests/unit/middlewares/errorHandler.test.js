@@ -1,6 +1,6 @@
 const errorHandler = require('../../../src/middlewares/errorHandler');
 
-describe('errorHandler middleware', () => {
+describe('middleware errorHandler', () => {
   let err;
   let req;
   let res;
@@ -14,33 +14,51 @@ describe('errorHandler middleware', () => {
     next = jest.fn();
   });
 
-  it('should return 500 with a generic error message', () => {
+  it('debe retornar 500 con mensaje genérico de error', () => {
+    // Arrange
+    // (err, req, res, next ya configurados en beforeEach)
+
+    // Act
     errorHandler(err, req, res, next);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
   });
 
-  it('should not leak the stack trace in the response', () => {
+  it('debe no filtrar el stack trace en la respuesta', () => {
+    // Arrange
+    // (err, req, res, next ya configurados en beforeEach)
+
+    // Act
     errorHandler(err, req, res, next);
 
+    // Assert
     const responseBody = res.json.mock.calls[0][0];
     expect(responseBody).not.toHaveProperty('stack');
   });
 
-  it('should not leak the original error message in the response', () => {
+  it('debe no filtrar el mensaje de error original en la respuesta', () => {
+    // Arrange
+    // (err, req, res, next ya configurados en beforeEach)
+
+    // Act
     errorHandler(err, req, res, next);
 
+    // Assert
     const responseBody = res.json.mock.calls[0][0];
     expect(responseBody).not.toHaveProperty('message');
   });
 
-  it('should not leak custom error fields (details, code) in the response', () => {
+  it('debe no filtrar campos de error personalizados (details, code) en la respuesta', () => {
+    // Arrange
     err.details = 'Sensitive DB details';
     err.code = '23505';
 
+    // Act
     errorHandler(err, req, res, next);
 
+    // Assert
     const responseBody = res.json.mock.calls[0][0];
     expect(responseBody).not.toHaveProperty('details');
     expect(responseBody).not.toHaveProperty('code');

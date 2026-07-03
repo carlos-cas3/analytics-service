@@ -1,6 +1,6 @@
 const apiKeyAuth = require('../../../src/middlewares/apiKeyAuth');
 
-describe('apiKeyAuth middleware', () => {
+describe('middleware apiKeyAuth', () => {
   let req;
   let res;
   let next;
@@ -11,37 +11,51 @@ describe('apiKeyAuth middleware', () => {
     next = jest.fn();
   });
 
-  it('should return 401 when x-api-key header is missing', () => {
+  it('debe retornar 401 cuando falta el header x-api-key', () => {
+    // Arrange
+    // (req ya configurado sin headers en beforeEach)
+
+    // Act
     apiKeyAuth(req, res, next);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ error: 'Unauthorized' });
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('should return 401 when x-api-key header is empty string', () => {
+  it('debe retornar 401 cuando el header x-api-key está vacío', () => {
+    // Arrange
     req.headers['x-api-key'] = '';
 
+    // Act
     apiKeyAuth(req, res, next);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(401);
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('should return 401 when x-api-key is incorrect', () => {
+  it('debe retornar 401 cuando x-api-key es incorrecto', () => {
+    // Arrange
     req.headers['x-api-key'] = 'wrong-key';
 
+    // Act
     apiKeyAuth(req, res, next);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(401);
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('should call next() when x-api-key matches INTERNAL_API_KEY', () => {
+  it('debe llamar a next() cuando x-api-key coincide con INTERNAL_API_KEY', () => {
+    // Arrange
     req.headers['x-api-key'] = 'test-api-key';
 
+    // Act
     apiKeyAuth(req, res, next);
 
+    // Assert
     expect(next).toHaveBeenCalledTimes(1);
     expect(res.status).not.toHaveBeenCalled();
   });
