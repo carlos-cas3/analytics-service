@@ -11,6 +11,7 @@ describe('healthController.check', () => {
   let mockSelect;
   let req;
   let res;
+  const originalNodeEnv = process.env.NODE_ENV;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -21,25 +22,63 @@ describe('healthController.check', () => {
     res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
   });
 
-  it('should return 200 with connected database when supabase query succeeds', async () => {
+  afterEach(() => {
+    process.env.NODE_ENV = originalNodeEnv;
+  });
+
+  it('debe retornar 200 con base de datos conectada cuando la consulta a Supabase es exitosa', async () => {
+    // Arrange
     mockLimit.mockResolvedValue({ data: [{ id: 1 }], error: null });
 
+    // Act
     await check(req, res);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'ok', database: 'connected' }),
     );
   });
 
-  it('should return 503 with degraded status when supabase query fails', async () => {
+  it('debe retornar 503 con estado degradado cuando la consulta a Supabase falla', async () => {
+    // Arrange
     mockLimit.mockResolvedValue({ data: null, error: new Error('timeout') });
 
+    // Act
     await check(req, res);
 
+    // Assert
     expect(res.status).toHaveBeenCalledWith(503);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'degraded', database: 'disconnected' }),
+    );
+  });
+
+  it('debe reflejar un NODE_ENV personalizado en la respuesta', async () => {
+    // Arrange
+    process.env.NODE_ENV = 'staging';
+    mockLimit.mockResolvedValue({ data: [{ id: 1 }], error: null });
+
+    // Act
+    await check(req, res);
+
+    // Assert
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ environment: 'staging' }),
+    );
+  });
+
+  it('debe usar "development" por defecto cuando NODE_ENV no está definido', async () => {
+    // Arrange
+    delete process.env.NODE_ENV;
+    mockLimit.mockResolvedValue({ data: [{ id: 1 }], error: null });
+
+    // Act
+    await check(req, res);
+
+    // Assert
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ environment: 'development' }),
     );
   });
 });

@@ -254,6 +254,11 @@ const validEventWithVendor = {
   vendor_ids: ['vendor-456'],
 };
 
+const eventVendorIdsWithEmptyString = {
+  ...validEvent,
+  vendor_ids: ['valid-id', ''],
+};
+
 const eventMissingAllFields = {};
 
 const eventInvalidUuid = {
@@ -288,17 +293,17 @@ const eventPayloadArray = {
 
 const eventEmptyService = {
   ...validEvent,
-  service: '',
+  service: '   ',
 };
 
 const eventEmptyAggregateType = {
   ...validEvent,
-  aggregate_type: '',
+  aggregate_type: '   ',
 };
 
 const eventEmptyAggregateId = {
   ...validEvent,
-  aggregate_id: '',
+  aggregate_id: '   ',
 };
 
 module.exports = {
@@ -321,6 +326,7 @@ module.exports = {
   eventCrossValidationFail,
   eventUnknownService,
   eventVendorIdsNotArray,
+  eventVendorIdsWithEmptyString,
   eventTypeNotInService,
   validEvent,
   validEventWithVendor,
