@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const eventRoutes = require('./routes/eventRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
 function createApp() {
@@ -25,6 +26,7 @@ function createApp() {
   app.use(limiter);
   app.use(express.json({ limit: '1mb' }));
   app.use(eventRoutes);
+  app.use(analyticsRoutes);
   app.use(errorHandler);
 
   return app;
