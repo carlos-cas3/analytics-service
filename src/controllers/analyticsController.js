@@ -298,7 +298,7 @@ async function getVendorAnalytics(req, res, next) {
           label: 'Órdenes', value: vendorMetrics.totalOrders, growth: ordersGrowth, prefix: '',
         },
         {
-          label: 'Ticket Prom', value: vendorMetrics.avgOrderValue, growth: avgGrowth, prefix: 'S/',
+          label: 'Valor Prom. Orden', value: vendorMetrics.avgOrderValue, growth: avgGrowth, prefix: 'S/',
         },
       ],
       comparisonTrends,
