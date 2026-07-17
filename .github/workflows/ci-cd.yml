@@ -57,9 +57,5 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [lint, test, sonarcloud]
     runs-on: ubuntu-latest
-    container: ghcr.io/railwayapp/cli:latest
     steps:
-      - uses: actions/checkout@v4
-      - run: railway up --project=${{ vars.RAILWAY_PROJECT_ID }} --environment=${{ vars.RAILWAY_ENVIRONMENT_ID }} --service=${{ vars.RAILWAY_SERVICE_ID }}
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      - run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
