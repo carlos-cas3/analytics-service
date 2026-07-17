@@ -45,6 +45,7 @@ async function getSuperAdminAnalytics(req, res, next) {
       categories, vendorRanking,
       trendHistory, tickets,
       ordersDistribution,
+      vendorTrend,
     ] = await Promise.all([
       repo.getTotalRevenue(),
       repo.getOrderCount(),
@@ -56,6 +57,7 @@ async function getSuperAdminAnalytics(req, res, next) {
       repo.getTrendHistory(),
       repo.getTicketStats(),
       repo.getOrdersDistribution(),
+      repo.getVendorTrend(),
     ]);
 
     const trends = comparisonTrends;
@@ -69,9 +71,13 @@ async function getSuperAdminAnalytics(req, res, next) {
       const curr = last2[1].completed + last2[1].pending;
       return prev > 0 ? Math.round(((curr - prev) / prev) * 1000) / 10 : 0;
     })();
-    const vendorGrowth = comparisonTrends.length >= 2 ?
-      Math.round(((totalVendors - 5) / 5) * 100) :
-      0;
+    const vendorGrowth = (() => {
+      const last2 = vendorTrend.slice(-2);
+      if (last2.length < 2) return 0;
+      const prev = last2[0].vendors;
+      const curr = last2[1].vendors;
+      return prev > 0 ? Math.round(((curr - prev) / prev) * 100) : 0;
+    })();
 
     const insights = [];
     if (revenueGrowth > 10) {
@@ -205,12 +211,14 @@ async function getVendorAnalytics(req, res, next) {
       vendorMetrics, revenueByMonth,
       ordersTrend, categories,
       topProductsWithGrowth,
+      avgOrderTrend,
     ] = await Promise.all([
       repo.getVendorMetrics(vendorId),
       repo.getRevenueByMonthForVendor(vendorId),
       repo.getOrdersTrendForVendor(vendorId),
       repo.getCategoryRevenueForVendor(vendorId),
       repo.getProductPerformanceForVendor(vendorId, 10),
+      repo.getAvgOrderTrendForVendor(vendorId),
     ]);
 
     const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -245,9 +253,13 @@ async function getVendorAnalytics(req, res, next) {
       return prev > 0 ? Math.round(((curr - prev) / prev) * 1000) / 10 : 0;
     })();
 
-    const avgGrowth = vendorMetrics.avgOrderValue > 0 ?
-      Math.round(((vendorMetrics.avgOrderValue - 400) / 400) * 100) :
-      0;
+    const avgGrowth = (() => {
+      const last2 = avgOrderTrend.slice(-2);
+      if (last2.length < 2) return 0;
+      const prev = last2[0].avgOrderValue;
+      const curr = last2[1].avgOrderValue;
+      return prev > 0 ? Math.round(((curr - prev) / prev) * 100) : 0;
+    })();
 
     const insights = [];
     if (revenueGrowth > 10) {

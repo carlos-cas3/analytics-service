@@ -293,21 +293,34 @@ async function getProductPerformanceForVendor(vendorId, limit = 10) {
   const grouped = {};
   for (const row of data || []) {
     const key = row.product_name;
-    if (!grouped[key]) grouped[key] = { productName: row.product_name, revenue: 0, orders: 0 };
-    grouped[key].revenue += Number(row.revenue);
-    grouped[key].orders += row.quantity;
+    if (!grouped[key]) {
+      grouped[key] = {
+        productName: row.product_name, totalRevenue: 0, totalOrders: 0, monthData: {},
+      };
+    }
+    grouped[key].totalRevenue += Number(row.revenue);
+    grouped[key].totalOrders += row.quantity;
+    if (!row.sub_orders?.orders_master) continue;
+    const d = new Date(row.sub_orders.orders_master.fecha);
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!grouped[key].monthData[monthKey]) grouped[key].monthData[monthKey] = 0;
+    grouped[key].monthData[monthKey] += Number(row.revenue);
   }
-  const products = Object.values(grouped);
-  for (const p of products) {
-    p.revenue = Math.round(p.revenue);
-  }
+  const products = Object.values(grouped).map((p) => {
+    const months = Object.keys(p.monthData).sort();
+    const latestMonth = months[months.length - 1];
+    const prevMonth = months.length > 1 ? months[months.length - 2] : null;
+    const latestRevenue = p.monthData[latestMonth];
+    const prevRevenue = prevMonth ? p.monthData[prevMonth] : 0;
+    return {
+      productName: p.productName,
+      revenue: Math.round(p.totalRevenue),
+      orders: p.totalOrders,
+      growth: prevRevenue > 0 ?
+        Math.round(((latestRevenue - prevRevenue) / prevRevenue) * 100) : 0,
+    };
+  });
   products.sort((a, b) => b.revenue - a.revenue);
-  for (let i = 0; i < products.length; i++) {
-    const growth = i < products.length - 1 && products[i + 1].revenue > 0 ?
-      Math.round(((products[i].revenue - products[i + 1].revenue) / products[i + 1].revenue) * 100) :
-      0;
-    products[i].growth = growth;
-  }
   return products.slice(0, limit);
 }
 
@@ -453,6 +466,50 @@ async function getOrdersTrendForVendor(vendorId) {
   }));
 }
 
+async function getVendorTrend() {
+  const { data, error } = await supabase
+    .from('sub_orders')
+    .select('vendor_id, orders_master!inner(fecha)');
+  if (error) throw error;
+  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const grouped = {};
+  for (const row of data || []) {
+    const d = new Date(row.orders_master.fecha);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!grouped[key]) grouped[key] = new Set();
+    grouped[key].add(row.vendor_id);
+  }
+  return Object.keys(grouped).sort().map((key) => {
+    const mIdx = parseInt(key.split('-')[1], 10) - 1;
+    return { month: monthNames[mIdx], vendors: grouped[key].size };
+  });
+}
+
+async function getAvgOrderTrendForVendor(vendorId) {
+  const { data, error } = await supabase
+    .from('sub_orders')
+    .select('monto, orders_master!inner(fecha)')
+    .eq('vendor_id', vendorId);
+  if (error) throw error;
+  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const grouped = {};
+  for (const row of data || []) {
+    const d = new Date(row.orders_master.fecha);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!grouped[key]) grouped[key] = { revenue: 0, orders: 0 };
+    grouped[key].revenue += Number(row.monto);
+    grouped[key].orders += 1;
+  }
+  return Object.keys(grouped).sort().map((key) => {
+    const mIdx = parseInt(key.split('-')[1], 10) - 1;
+    return {
+      month: monthNames[mIdx],
+      avgOrderValue: grouped[key].orders > 0 ?
+        Math.round(grouped[key].revenue / grouped[key].orders) : 0,
+    };
+  });
+}
+
 async function getVendorRanking() {
   const { data, error } = await supabase
     .from('sub_orders')
@@ -583,6 +640,8 @@ module.exports = {
   getTrendHistory,
   getOrdersTrend,
   getOrdersTrendForVendor,
+  getVendorTrend,
+  getAvgOrderTrendForVendor,
   getVendorRanking,
   getRecentAlerts,
   getAlertsForVendor,
