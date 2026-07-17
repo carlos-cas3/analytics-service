@@ -15,8 +15,9 @@ async function getVendorName(vendorId) {
   try {
     const res = await fetch(`${VENDOR_SERVICE_URL}/api/vendors/${vendorId}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const name = data.vendor_name || data.name || `Vendor #${vendorId}`;
+    const body = await res.json();
+    const vendor = body.data || body;
+    const name = vendor.vendor_name || vendor.name || `Vendor #${vendorId}`;
     vendorCache.set(key, name);
     return name;
   } catch (err) {
@@ -31,8 +32,8 @@ async function getProductsByVendor(vendorId) {
   try {
     const res = await fetch(`${CATALOG_SERVICE_URL}/api/vendor-products/${vendorId}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const products = Array.isArray(data) ? data : [];
+    const body = await res.json();
+    const products = Array.isArray(body.data) ? body.data : [];
     productsCache.set(key, products);
     return products;
   } catch (err) {
@@ -43,16 +44,13 @@ async function getProductsByVendor(vendorId) {
 
 async function getProductInfo(vendorId, productId) {
   const products = await getProductsByVendor(vendorId);
-  const product = products.find(
-    (p) => String(p.id_producto) === String(productId) ||
-      String(p.id) === String(productId) ||
-      String(p.product_id) === String(productId) ||
-      String(p.codigo) === String(productId),
+  const item = products.find(
+    (p) => String(p.product_id) === String(productId),
   );
-  if (product) {
+  if (item && item.products) {
     return {
-      product_name: product.product_name || product.nombre || product.name || `Producto #${productId}`,
-      category: product.category || product.categoria || 'Sin categoría',
+      product_name: item.products.product_name || `Producto #${productId}`,
+      category: item.products.categories?.category_name || 'Sin categoría',
     };
   }
   return { product_name: `Producto #${productId}`, category: 'Sin categoría' };
