@@ -18,6 +18,8 @@ const VALID_TYPES_BY_SERVICE = {
   'ordenes-service': [
     'ORDER_CREATED',
     'ORDER_STATUS_CHANGED',
+  ],
+  'postventa-service': [
     'TICKET_CREADO',
     'TICKET_APROBADO',
   ],
