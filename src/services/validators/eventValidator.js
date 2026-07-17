@@ -15,6 +15,12 @@ const VALID_TYPES_BY_SERVICE = {
     'STAFF_UPDATED',
     'STAFF_STATUS_CHANGED',
   ],
+  'ordenes-service': [
+    'ORDER_CREATED',
+    'ORDER_STATUS_CHANGED',
+    'TICKET_CREADO',
+    'TICKET_APROBADO',
+  ],
 };
 
 const VALID_SERVICES = Object.keys(VALID_TYPES_BY_SERVICE);
@@ -32,6 +38,10 @@ const AGGREGATE_TYPE_BY_EVENT = {
   STAFF_CREATED: 'staff',
   STAFF_UPDATED: 'staff',
   STAFF_STATUS_CHANGED: 'staff',
+  ORDER_CREATED: 'orden_maestra',
+  ORDER_STATUS_CHANGED: 'sub_orden',
+  TICKET_CREADO: 'ticket',
+  TICKET_APROBADO: 'ticket',
 };
 
 function validateEvent(event) {
