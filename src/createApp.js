@@ -8,6 +8,8 @@ const errorHandler = require('./middlewares/errorHandler');
 function createApp() {
   const app = express();
 
+
+  
   const allowedOrigins = (
     process.env.ALLOWED_ORIGINS ||
     'http://localhost:5137,http://localhost:3001,http://localhost:3006,http://localhost:3002'
@@ -15,9 +17,11 @@ function createApp() {
 
   app.use(cors({ origin: allowedOrigins }));
 
+
+  
   const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 60 * 1000,
+    max: 1000,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests, please try again later.' },
